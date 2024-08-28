@@ -32,7 +32,7 @@ def check_graphs_v1(data, preds, threshold=None, name="default", piece=15):
     fig = plt.figure(figsize=(12, 6))
     plt.ticklabel_format(style="scientific", axis="both", scilimits=(0, 0))
     xticks = range(0, len(data))
-    plt.ylim(0, 1)
+    plt.ylim(0, data.mean() / 2)
     plt.xticks(np.arange(0, len(data), step=50000), rotation=45)
     plt.plot(xticks, data, color="green")
     plt.plot(xticks, preds, color="blue", linestyle="solid", linewidth=2, alpha=0.3)
@@ -45,21 +45,24 @@ def check_graphs_v1(data, preds, threshold=None, name="default", piece=15):
 
 def check_graphs_v2(data, preds, anomaly, interval=10000, img_path=None, mode="train"):
     pieces = int(len(data) // interval)
-    scale = 0.2 / anomaly.mean()
+    scale = anomaly.mean() / 2
     for i in range(pieces):
         start = i * interval
         end = min(start + interval, len(data))
         xticks = range(start, end)
         values = data[start:end]
-        plt.figure(figsize=(16, 8))
-        plt.ylim(-0.25, 1.25)
-        plt.xticks(np.arange(start, end, step=1000), rotation=45)
-        plt.grid()
-        plt.plot(xticks, values)
-        plt.plot(xticks, preds[start:end], color="b", linewidth=6, alpha=0.5)
-        plt.plot(xticks, anomaly[start:end] * scale, color="g", linewidth=6)
-        plt.axhline(y=threshold * scale, color="r", linewidth=6)
-        plt.savefig(img_path / f"{mode}_raw_data" / f"raw_{i+1:02d}_pages")
+        fig, ax1 = plt.subplots(figsize=(16, 8))
+        ax1.set_ylim(-0.25, 1.25)
+        ax1.set_xticks(np.arange(start, end, step=1000))
+        ax1.grid()
+        ax1.plot(xticks, values)
+        ax1.plot(xticks, preds[start:end], color="b", linewidth=6, alpha=0.5)
+        ax2 = ax1.twinx()
+        ax2.set_ylim(0, scale)
+        ax2.plot(xticks, anomaly[start:end], color="g", linewidth=6)
+        ax2.axhline(y=threshold, color="r", linewidth=6)
+        fig.tight_layout()
+        fig.savefig(img_path / f"{mode}_raw_data" / f"raw_{i+1:02d}_pages")
 
 
 if __name__ == "__main__":
