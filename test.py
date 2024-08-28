@@ -10,7 +10,6 @@ test_df = pickle.load(open(data_path / "test.pkl", "rb"))
 X_train = train_df.values
 X_test = test_df.values
 
-# clf = TimesNet()
 clf = AnomalyTransformer()
 clf.fit(X_train)
 scores = clf.decision_function(X_test)
