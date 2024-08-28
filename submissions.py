@@ -72,7 +72,7 @@ if __name__ == "__main__":
     scores_f = signal.detrend(scores, type="linear")
     scores = scores_f - scores_f.min()
 
-    anomaly_ratio = 12
+    anomaly_ratio = 10
     threshold = np.percentile(scores, 100 - anomaly_ratio)
     print(f"Anomaly threshold: {threshold}")
     prediction = np.zeros_like(scores)
