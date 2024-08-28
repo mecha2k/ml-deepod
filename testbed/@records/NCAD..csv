@@ -1,0 +1,8 @@
+
+---------------------------------------------------------
+model: NCAD, dataset: SMD, 5runs, 08-27 17.31.48
+Parameters,	 [seq_len], 		  30
+Parameters,	 [stride], 		  10
+Note: 
+---------------------------------------------------------
+data, adj_auroc, std, adj_ap, std, adj_f1, std, adj_p, std, adj_r, std, time, model
