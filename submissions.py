@@ -32,7 +32,7 @@ def check_graphs_v1(data, preds, threshold=None, name="default", piece=15):
     fig = plt.figure(figsize=(12, 6))
     plt.ticklabel_format(style="scientific", axis="both", scilimits=(0, 0))
     xticks = range(0, len(data))
-    plt.ylim(0, threshold * 2)
+    plt.ylim(0, 1)
     plt.xticks(np.arange(0, len(data), step=50000), rotation=45)
     plt.plot(xticks, data, color="green")
     plt.plot(xticks, preds, color="blue", linestyle="solid", linewidth=2, alpha=0.3)
@@ -70,9 +70,9 @@ if __name__ == "__main__":
         scores = pickle.load(f)
     scores = scores.values.flatten()
     scores_f = signal.detrend(scores, type="linear")
-    scores = scores_f - scores_f.min()
+    scores_f = scores_f - scores_f.min()
 
-    anomaly_ratio = 10
+    anomaly_ratio = 2
     threshold = np.percentile(scores, 100 - anomaly_ratio)
     print(f"Anomaly threshold: {threshold}")
     prediction = np.zeros_like(scores)
