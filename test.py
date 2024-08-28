@@ -1,9 +1,14 @@
-# time series anomaly detection methods
-from deepod.models.time_series import AnomalyTransformer, TranAD, TimesNet
-from pathlib import Path
+import torch
 import numpy as np
 import pandas as pd
 import pickle
+
+from pathlib import Path
+from deepod.models.time_series import AnomalyTransformer, TranAD, TimesNet
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("mps" if torch.backends.mps.is_available() else device)
+print(f"{device} is available in torch")
 
 # data_path = Path("datasets/open")
 # train_df = pickle.load(open(data_path / "train.pkl", "rb"))
@@ -11,7 +16,7 @@ import pickle
 # X_train = train_df.values
 # X_test = test_df.values
 #
-# clf = AnomalyTransformer()
+# clf = AnomalyTransformer(device=device)
 # clf.fit(X_train)
 #
 # train_scores = clf.decision_function(X_train)
@@ -37,5 +42,10 @@ with open(data_path / "SMD_test_label.npy", "rb") as f:
     labels = np.load(f)
 print(train.shape, test.shape, labels.shape)
 
+clf = AnomalyTransformer(device=device)
+clf.fit(train)
+
+scores = clf.decision_function(test)
 # eval_metrics = ts_metrics(labels, scores)
-# adj_eval_metrics = ts_metrics(labels, point_adjustment(labels, scores))
+adj_eval_metrics = ts_metrics(labels, point_adjustment(labels, scores))
+print(adj_eval_metrics)
