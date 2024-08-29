@@ -6,3 +6,13 @@ Parameters,	 [stride], 		  10
 Note: 
 ---------------------------------------------------------
 data, adj_auroc, std, adj_ap, std, adj_f1, std, adj_p, std, adj_r, std, time, model
+
+---------------------------------------------------------
+
+---------------------------------------------------------
+model: NCAD, datasets: SMD, 5runs, 08-30 02.12.09
+Parameters,	 [seq_len], 		  30
+Parameters,	 [stride], 		  10
+Note: 
+---------------------------------------------------------
+data, adj_auroc, std, adj_ap, std, adj_f1, std, adj_p, std, adj_r, std, time, model

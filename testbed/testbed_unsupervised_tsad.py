@@ -15,10 +15,8 @@ from deepod.metrics import ts_metrics, point_adjustment
 dataset_root = f"/home/{getpass.getuser()}/datasets/5-TSdata/_processed_data/"
 parser = argparse.ArgumentParser()
 parser.add_argument("--runs", type=int, default=5, help="how many times we repeat")
-parser.add_argument(
-    "--output_dir", type=str, default="@records/", help="the output path"
-)
-parser.add_argument("--datasets", type=str, default="SMD", help="the datasets name")
+parser.add_argument("--output_dir", type=str, default="@records/", help="the output path")
+parser.add_argument("--dataset", type=str, default="SMD", help="the datasets name")
 parser.add_argument("--entities", type=str, default="FULL", help="all in the folder")
 parser.add_argument("--entity_combined", type=int, default=1)
 parser.add_argument("--model", type=str, default="NCAD", help="")
@@ -39,9 +37,7 @@ with open(path) as f:
     try:
         model_configs = d[args.model]
     except KeyError:
-        print(
-            f"config file does not contain default parameter settings of {args.model}"
-        )
+        print(f"config file does not contain default parameter settings of {args.model}")
         model_configs = {}
 model_configs["seq_len"] = args.seq_len
 model_configs["stride"] = args.stride
@@ -58,8 +54,7 @@ if not args.silent_header:
     f = open(result_file, "a")
     print("\n---------------------------------------------------------", file=f)
     print(
-        f"model: {args.model}, datasets: {args.dataset}, "
-        f"{args.runs}runs, {cur_time}",
+        f"model: {args.model}, datasets: {args.dataset}, " f"{args.runs}runs, {cur_time}",
         file=f,
     )
     for k in model_configs.keys():
@@ -152,9 +147,7 @@ for dataset in dataset_name_lst:
 
         for i in range(runs):
             start_time = time.time()
-            print(
-                f"\nRunning [{i + 1}/{args.runs}] of [{args.model}] on Dataset [{dataset_name}]"
-            )
+            print(f"\nRunning [{i + 1}/{args.runs}] of [{args.model}] on Dataset [{dataset_name}]")
 
             t1 = time.time()
 
@@ -186,25 +179,21 @@ for dataset in dataset_name_lst:
         entity_metric_std_lst.append(std_entry)
 
         f = open(result_file, "a")
-        txt = (
-            "%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, "
-            "%.4f, %.4f, %.4f, %.4f, %.1f, %s, %s "
-            % (
-                dataset_name,
-                avg_entry[0],
-                std_entry[0],
-                avg_entry[1],
-                std_entry[1],
-                avg_entry[2],
-                std_entry[2],
-                avg_entry[3],
-                std_entry[3],
-                avg_entry[4],
-                std_entry[4],
-                np.average(t_lst),
-                args.model,
-                str(model_configs),
-            )
+        txt = "%s, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f, " "%.4f, %.4f, %.4f, %.4f, %.1f, %s, %s " % (
+            dataset_name,
+            avg_entry[0],
+            std_entry[0],
+            avg_entry[1],
+            std_entry[1],
+            avg_entry[2],
+            std_entry[2],
+            avg_entry[3],
+            std_entry[3],
+            avg_entry[4],
+            std_entry[4],
+            np.average(t_lst),
+            args.model,
+            str(model_configs),
         )
         print(txt)
         print(txt, file=f)
