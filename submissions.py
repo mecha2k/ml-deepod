@@ -41,7 +41,7 @@ def check_graphs_v1(data, data_f, preds, threshold=None, name="default", piece=1
     if threshold is not None:
         plt.axhline(y=threshold, color="r", linewidth=2)
     plt.grid()
-    plt.legend(["Anomaly Score (detrend)", "Anomaly Score", "Prediction"])
+    plt.legend(["Anomaly Score (detrend)", "Anomaly Score", "Prediction", "Threshold"])
     plt.tight_layout()
     fig.savefig(f"{name}_all")
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
         scores = pickle.load(f)
     scores = scores.values.flatten()
 
-    prediction = find_anomaly(scores, anomaly_ratio=2)
+    prediction = find_anomaly(scores, anomaly_ratio=5)
     sample_submission = pd.read_csv(data_path / "sample_submission.csv")
     sample_submission["anomaly"] = prediction
     sample_submission.to_csv(data_path / "final_submission.csv", index=False)
