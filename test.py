@@ -48,6 +48,15 @@ print(attack_v0.tail())
 print(attack_v0["Normal/Attack"].value_counts())
 print(attack_v0.describe())
 
+# create new column with name "labels" in attack_v0
+attack_v0["labels"] = 0
+attack_v0["labels"] = attack_v0["Normal/Attack"].apply(lambda x: 0 if x == "Normal" else 1)
+print(attack_v0["labels"].value_counts())
+
+# if attack_v0 "Normal/Attack" column converts to 0, 1 in new column name "Label"
+# normal_v1["Label"] = 0
+# attack_v0["Normal/Attack"] = attack_v0["Normal/Attack"].apply(lambda x: 0 if x == "Normal" else 1)
+
 # for name in data_name:
 #     train_df = pd.read_pickle(data_path / f"{name}.pkl")
 #     print(train_df.shape)
@@ -99,7 +108,7 @@ X_train = train_df.values
 X_test = test_df.values
 print(X_train.shape, X_test.shape)
 print(train_df.describe())
-#
+
 # clf = AnomalyTransformer(device=device)
 # clf.fit(X_train)
 #
