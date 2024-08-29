@@ -17,6 +17,7 @@ train_df = pickle.load(open(data_path / "train.pkl", "rb"))
 test_df = pickle.load(open(data_path / "test.pkl", "rb"))
 X_train = train_df.values
 X_test = test_df.values
+print(X_train.shape, X_test.shape)
 
 clf = AnomalyTransformer(device=device)
 clf.fit(X_train)
