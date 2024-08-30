@@ -18,8 +18,9 @@ def load_datasets(data_path, mode="open"):
     if mode == "open":
         train_df = pickle.load(open(data_path / "train.pkl", "rb"))
         test_df = pickle.load(open(data_path / "test.pkl", "rb"))
-        X_train = train_df.values
-        X_test = test_df.values
+        print(train_df.head())
+        X_train = train_df[:10000].values
+        X_test = test_df[:10000].values
         y_test = np.zeros_like(X_test.shape[0])
     elif mode == "swat":
         X_train = np.load(data_path / "train.npy")
@@ -29,31 +30,30 @@ def load_datasets(data_path, mode="open"):
 
 
 if __name__ == "__main__":
-    # mode = "open"
-    # data_path = Path("datasets/open")
+    mode = "open"
+    data_path = Path("datasets/open")
     # mode = "SMD"
     # data_path = Path("datasets/SMD")
-
-    mode = "swat"
-    data_path = Path("datasets/SWaT")
+    # mode = "swat"
+    # data_path = Path("datasets/SWaT")
 
     X_train, X_test, y_test = load_datasets(data_path, mode=mode)
     print(X_train.shape, X_test.shape, y_test.shape)
 
-    # clf = AnomalyTransformer(device=device)
-    # clf.fit(X_train)
-    #
-    # scores = clf.decision_function(X_test)
-    # print(scores.shape)
-    # print(scores[:50])
+    clf = AnomalyTransformer(device=device)
+    clf.fit(X_train)
+
+    scores = clf.decision_function(X_test)
+    print(scores.shape)
+    print(scores[:50])
     # scores = pd.DataFrame(scores)
     # scores.to_pickle(data_path / "test_scores.pkl")
 
-    scores = pd.read_pickle(data_path / "test_scores.pkl")
-    print(scores.describe())
-    print(scores.info())
-    print(scores.head())
-    print(scores.shape)
+    # scores = pd.read_pickle(data_path / "test_scores.pkl")
+    # print(scores.describe())
+    # print(scores.info())
+    # print(scores.head())
+    # print(scores.shape)
 
     # # evaluation of time series anomaly detection
     # from deepod.metrics import ts_metrics
