@@ -16,8 +16,8 @@ print(f"{device} is available in torch")
 
 def load_datasets(data_path, mode="open"):
     if mode == "open":
-        train_df = pickle.load(open(data_path / "train.pkl", "rb"))
-        test_df = pickle.load(open(data_path / "test.pkl", "rb"))
+        train_df = pd.read_pickle(data_path / "train.pkl")
+        test_df = pd.read_pickle(data_path / "test.pkl")
         X_train = train_df[:1000].values
         X_test = test_df[:1000].values
         y_test = np.zeros_like(X_test.shape[0])
