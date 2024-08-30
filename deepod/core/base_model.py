@@ -95,12 +95,25 @@ class BaseDeepAD(metaclass=ABCMeta):
         ``threshold_`` on ``decision_scores_``.
 
     """
-    def __init__(self, model_name, data_type='tabular', network='MLP',
-                 epochs=100, batch_size=64, lr=1e-3,
-                 n_ensemble=1, seq_len=100, stride=1,
-                 epoch_steps=-1, prt_steps=10,
-                 device='cuda', contamination=0.1,
-                 verbose=1, random_state=42):
+
+    def __init__(
+        self,
+        model_name,
+        data_type="tabular",
+        network="MLP",
+        epochs=100,
+        batch_size=64,
+        lr=1e-3,
+        n_ensemble=1,
+        seq_len=100,
+        stride=1,
+        epoch_steps=-1,
+        prt_steps=10,
+        device="cuda",
+        contamination=0.1,
+        verbose=1,
+        random_state=42,
+    ):
         self.model_name = model_name
 
         self.data_type = data_type
@@ -170,9 +183,13 @@ class BaseDeepAD(metaclass=ABCMeta):
             Fitted estimator.
         """
 
-        if self.data_type == 'ts':
+        if self.data_type == "ts":
             X_seqs = get_sub_seqs(X, seq_len=self.seq_len, stride=self.stride)
-            y_seqs = get_sub_seqs_label(y, seq_len=self.seq_len, stride=self.stride) if y is not None else None
+            y_seqs = (
+                get_sub_seqs_label(y, seq_len=self.seq_len, stride=self.stride)
+                if y is not None
+                else None
+            )
             self.train_data = X_seqs
             self.train_label = y_seqs
             self.n_samples, self.n_features = X_seqs.shape[0], X_seqs.shape[2]
@@ -182,28 +199,30 @@ class BaseDeepAD(metaclass=ABCMeta):
             self.n_samples, self.n_features = X.shape
 
         if self.verbose >= 1:
-            print('Start Training...')
+            print("Start Training...")
 
-        if self.n_ensemble == 'auto':
+        if self.n_ensemble == "auto":
             self.n_ensemble = int(np.floor(100 / (np.log(self.n_samples) + self.n_features)) + 1)
         if self.verbose >= 1:
-            print(f'ensemble size: {self.n_ensemble}')
+            print(f"ensemble size: {self.n_ensemble}")
 
         for _ in range(self.n_ensemble):
-            self.train_loader, self.net, self.criterion = self.training_prepare(self.train_data,
-                                                                                y=self.train_label)
+            self.train_loader, self.net, self.criterion = self.training_prepare(
+                self.train_data, y=self.train_label
+            )
             self._training()
 
         if self.verbose >= 1:
-            print('Start Inference on the training data...')
+            print("Start Inference on the training data...")
 
         self.decision_scores_ = self.decision_function(X)
         self.labels_ = self._process_decision_scores()
 
         return self
 
-    def fit_auto_hyper(self, X, y=None, X_test=None, y_test=None,
-                       n_ray_samples=5, time_budget_s=None):
+    def fit_auto_hyper(
+        self, X, y=None, X_test=None, y_test=None, n_ray_samples=5, time_budget_s=None
+    ):
         """
         Fit detector. y is ignored in unsupervised methods.
 
@@ -233,22 +252,24 @@ class BaseDeepAD(metaclass=ABCMeta):
         config : dict
             tuned hyper-parameter
         """
-        if self.data_type == 'ts':
+        if self.data_type == "ts":
             self.train_data = get_sub_seqs(X, self.seq_len, self.stride)
-            self.train_label = get_sub_seqs_label(y, self.seq_len, self.stride) if y is not None else None
+            self.train_label = (
+                get_sub_seqs_label(y, self.seq_len, self.stride) if y is not None else None
+            )
             self.n_samples, self.n_features = self.train_data.shape[0], self.train_data.shape[2]
 
-        elif self.data_type == 'tabular':
+        elif self.data_type == "tabular":
             self.train_data = X
             self.train_label = y
             self.n_samples, self.n_features = self.train_data.shape
 
         else:
-            raise NotImplementedError('unsupported data_type')
+            raise NotImplementedError("unsupported data_type")
 
         config = self.set_tuned_params()
-        metric = "loss" if X_test is None else 'metric'
-        mode = "min" if X_test is None else 'max'
+        metric = "loss" if X_test is None else "metric"
+        mode = "min" if X_test is None else "max"
         scheduler = ASHAScheduler(
             metric=metric,
             mode=mode,
@@ -257,17 +278,16 @@ class BaseDeepAD(metaclass=ABCMeta):
             reduction_factor=2,
         )
 
-        size = sys.getsizeof(self.train_data)/(1024**2)
+        size = sys.getsizeof(self.train_data) / (1024**2)
         if size >= 30:
             split = int(len(self.train_data) / (size / 30))
             self.train_data = self.train_data[:split]
             self.train_label = self.train_label[:split] if y is not None else None
-            warnings.warn('split training data to meet the 95 MiB limit of ray ImplitFunc')
+            warnings.warn("split training data to meet the 95 MiB limit of ray ImplitFunc")
 
         result = tune.run(
-            partial(self._training_ray,
-                    X_test=X_test, y_test=y_test),
-            resources_per_trial={"cpu": 4, "gpu": 0 if self.device == 'cpu' else 1},
+            partial(self._training_ray, X_test=X_test, y_test=y_test),
+            resources_per_trial={"cpu": 4, "gpu": 0 if self.device == "cpu" else 1},
             config=config,
             num_samples=n_ray_samples,
             time_budget_s=time_budget_s,
@@ -284,7 +304,7 @@ class BaseDeepAD(metaclass=ABCMeta):
         best_config = best_trial.config
         self.load_ray_checkpoint(best_config=best_config, best_checkpoint=best_checkpoint)
 
-        best_config['epochs'] = best_checkpoint['epoch']
+        best_config["epochs"] = best_checkpoint["epoch"]
 
         # testing on the input training data
         self.decision_scores_ = self.decision_function(X)
@@ -315,7 +335,7 @@ class BaseDeepAD(metaclass=ABCMeta):
 
         testing_n_samples = X.shape[0]
 
-        if self.data_type == 'ts':
+        if self.data_type == "ts":
             X = get_sub_seqs(X, seq_len=self.seq_len, stride=1)
 
         representations = []
@@ -326,8 +346,8 @@ class BaseDeepAD(metaclass=ABCMeta):
             z, scores = self._inference()
             z, scores = self.decision_function_update(z, scores)
 
-            if self.data_type == 'ts':
-                padding = np.zeros(self.seq_len-1)
+            if self.data_type == "ts":
+                padding = np.zeros(self.seq_len - 1)
                 scores = np.hstack((padding, scores))
 
             s_final += scores
@@ -361,7 +381,7 @@ class BaseDeepAD(metaclass=ABCMeta):
         """
 
         pred_score = self.decision_function(X)
-        prediction = (pred_score > self.threshold_).astype('int').ravel()
+        prediction = (pred_score > self.threshold_).astype("int").ravel()
 
         if return_confidence:
             confidence = self._predict_confidence(pred_score)
@@ -396,11 +416,11 @@ class BaseDeepAD(metaclass=ABCMeta):
         posterior_prob = np.vectorize(lambda x: (1 + x) / (2 + n))(n_instances)
 
         # Transform the outlier probability into a confidence value
-        confidence = np.vectorize(
-            lambda p: 1 - binom.cdf(n - int(n*self.contamination), n, p)
-        )(posterior_prob)
-        prediction = (test_scores > self.threshold_).astype('int').ravel()
-        np.place(confidence, prediction==0, 1-confidence[prediction == 0])
+        confidence = np.vectorize(lambda p: 1 - binom.cdf(n - int(n * self.contamination), n, p))(
+            posterior_prob
+        )
+        prediction = (test_scores > self.threshold_).astype("int").ravel()
+        np.place(confidence, prediction == 0, 1 - confidence[prediction == 0])
         return confidence
 
     def _process_decision_scores(self):
@@ -415,7 +435,7 @@ class BaseDeepAD(metaclass=ABCMeta):
         """
 
         self.threshold_ = np.percentile(self.decision_scores_, 100 * (1 - self.contamination))
-        self.labels_ = (self.decision_scores_ > self.threshold_).astype('int').ravel()
+        self.labels_ = (self.decision_scores_ > self.threshold_).astype("int").ravel()
 
         self._mu = np.mean(self.decision_scores_)
         self._sigma = np.std(self.decision_scores_)
@@ -444,10 +464,8 @@ class BaseDeepAD(metaclass=ABCMeta):
                     break
 
             t = time.time() - t1
-            if self.verbose >= 1 and (i == 0 or (i+1) % self.prt_steps == 0):
-                print(f'epoch{i+1:3d}, '
-                      f'training loss: {total_loss/cnt:.6f}, '
-                      f'time: {t:.1f}s')
+            if self.verbose >= 1 and (i == 0 or (i + 1) % self.prt_steps == 0):
+                print(f"epoch{i+1:3d}, " f"training loss: {total_loss/cnt:.6f}, " f"time: {t:.1f}s")
 
             if i == 0:
                 self.epoch_time = t
@@ -466,7 +484,7 @@ class BaseDeepAD(metaclass=ABCMeta):
             score_lst = []
 
             if self.verbose >= 2:
-                _iter_ = tqdm(self.test_loader, desc='testing: ')
+                _iter_ = tqdm(self.test_loader, desc="testing: ")
             else:
                 _iter_ = self.test_loader
 
@@ -537,4 +555,3 @@ class BaseDeepAD(metaclass=ABCMeta):
         random.seed(seed)
         # torch.backends.cudnn.benchmark = False
         # torch.backends.cudnn.deterministic = True
-

@@ -18,9 +18,8 @@ def load_datasets(data_path, mode="open"):
     if mode == "open":
         train_df = pickle.load(open(data_path / "train.pkl", "rb"))
         test_df = pickle.load(open(data_path / "test.pkl", "rb"))
-        print(train_df.head())
-        X_train = train_df[:10000].values
-        X_test = test_df[:10000].values
+        X_train = train_df.values
+        X_test = test_df.values
         y_test = np.zeros_like(X_test.shape[0])
     elif mode == "swat":
         X_train = np.load(data_path / "train.npy")
