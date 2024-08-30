@@ -146,17 +146,6 @@ class AnomalyTransformer(BaseDeepAD):
             train_seqs, batch_size=self.batch_size, shuffle=True, pin_memory=True
         )
 
-        batch = next(iter(dataloader))
-        print(batch.numpy().flatten()[:50])
-
-        import matplotlib.pyplot as plt
-
-        plt.hist(batch.numpy().flatten()[:500000])
-        plt.show()
-
-        input = batch.float().to(self.device)
-        output, series, prior, _ = self.net(input)
-
         self.optimizer = torch.optim.AdamW(self.net.parameters(), lr=self.lr, weight_decay=1e-5)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=5, gamma=0.5)
 
